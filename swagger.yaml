@@ -1,0 +1,257 @@
+openapi: 3.0.3
+info:
+  title: Order API
+  description:
+    This is the Order API. It provides RESTful operation for customer's
+    orders.
+  termsOfService: N/A
+  contact:
+    name: Prakash Singh Thakuri
+    url: https://github.com/prakashsingha
+    email: prakashsingha@gmail.com
+  license:
+    name: MIT
+    url: http://opensource.org/licenses/MIT
+  version: 1.0.0-oas3
+servers:
+  - url: http://api.demo-dev.com/oms/v1
+    description: For internal development use
+  - url: https://api.demo-stag.com/oms/v1
+    description: For internal staging use
+security:
+  - basicAuth: []
+paths:
+  /orders:
+    get:
+      summary: Get all orders
+      description: View of all orders from the system
+      operationId: getOrders
+      parameters:
+        - name: hotelName
+          in: query
+          description: search by hotel name
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: cName
+          in: query
+          description: search by customer name
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: cEmail
+          in: query
+          description: search by customer email
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: cPhone
+          in: query
+          description: search by customer phone
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of all
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderModel'
+                x-content-type: application/json
+        '400':
+          description: No any order found
+    post:
+      summary: adds a new order
+      description: Add a new order to the system
+      operationId: createOrder
+      requestBody:
+        description: order data in JSON format
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hotelId:
+                  type: string
+                  format: uuid
+                hotelName:
+                  type: string
+                checkInDate:
+                  type: string
+                  format: date-time
+                checkOutDate:
+                  type: string
+                  format: date-time
+                customer:
+                  $ref: '#/components/schemas/OrderModel_customer'
+                room:
+                  $ref: '#/components/schemas/OrderModel_room'
+                totalAmount:
+                  type: number
+                  format: float
+                paymentId:
+                  type: string
+                  format: uuid
+        required: true
+      responses:
+        '201':
+          description: Creates a new order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderModel'
+        '500':
+          description: Internal Server Error
+  /payments:
+    patch:
+      summary: updates the payment 
+      description: Update payment status from PENDING to COMPLETE
+      operationId: updatePayment
+      requestBody:
+        description: payment data in JSON format
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                status:
+                  type: integer
+                cardNo:
+                  type: string
+        required: true
+      responses:
+        '201':
+          description: Updates the payment status
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/PaymentModel'
+    get:
+      summary: Get payment detail
+      description: View the payment detail filtered via querystring
+      operationId: getPaymentStatus
+      parameters:
+        - name: id
+          in: query
+          description: query by paymentID
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns payment status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                
+        '400':
+          description: ID does not exist
+
+components:
+  schemas:
+    OrderModel:
+      type: object
+      properties:
+        ID:
+          type: string
+          format: uuid
+        hotelId:
+          type: string
+          format: uuid
+        hotelName:
+          type: string
+        checkInDate:
+          type: string
+          format: date
+        checkOutDate:
+          type: string
+          format: date
+        customer:
+          $ref: '#/components/schemas/OrderModel_customer'
+        room:
+          $ref: '#/components/schemas/OrderModel_room'
+        totalAmount:
+          type: number
+          format: float
+        paymentId:
+          type: string
+          format: uuid
+      example:
+        totalAmount: 5.962134
+        room:
+          noOfGuest: 1
+          roomId: roomId
+          roomName: roomName
+        checkOutDate: 2000-01-23
+        orderId: 5f880d7a80291b25f93e16ba
+        paymentId: 1f8816c780291b25f93e16d6
+        hotelId: 2f8816c780291b25f93e16d6
+        checkInDate: 2000-01-23
+        customer:
+          Name: Name
+          Phone: phone
+          Email: email
+    OrderModel_customer:
+      type: object
+      properties:
+        Name:
+          type: string
+        Email:
+          type: string
+        Phone:
+          type: string
+      example:
+        Name: Name
+        Phone: Phone
+        Email: Email
+    OrderModel_room:
+      properties:
+        ID:
+          type: string
+          format: uuid
+        Name:
+          type: string
+        noOfGuest:
+          type: integer
+      example:
+        roomId: 5f8816c780291b25f93e16d6
+        roomName: Hotel Grand Hyatt
+        noOfGuest: 1
+    PaymentModel:
+      properties:
+        ID:
+          type: string
+          format: uuid
+        Status:
+          type: string
+        ConfirmedDate:
+          type: string
+          format: date-time
+      example:
+        id: 9f8816c780291b25f93e16d6
+        status: 1
+        confirmedDate: datetime
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
