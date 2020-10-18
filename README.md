@@ -13,6 +13,13 @@ Please follow the following URL to get the full structure of the API.
 
 [OAS Documentation](https://app.swaggerhub.com/apis/prakashsingha/order-api/1.0.0-oas3)
 
+## Data Structure
+
+- Database: oms
+  - Collections:
+    - orders
+    - payments
+
 ### Running the server
 
 To run the server, follow these simple steps:
